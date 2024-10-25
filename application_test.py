@@ -23,6 +23,25 @@ def test_empty_input(client):
     assert 'error' in data
 
 
+def test_prediction_correctness(client):
+    test_cases = [
+        ("BREAKING: Aliens land in New York City", "FAKE"),
+        ("Scientists discover new species in the Amazon rainforest", "FAKE"),
+        ("OnePlus officially shames One UI for its failure in system fluency.", "REAL"),
+        ("Apple Releases New AirPods Pro 2 Firmware Ahead of Hearing Aid Feature Launch.", "REAL")
+    ]
+
+    for text, expected_prediction in test_cases:
+        response = client.post('/predict', json={'text': text})
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        assert 'prediction' in data
+        assert data['prediction'] in ['REAL', 'FAKE']
+        assert data['prediction'] == expected_prediction, f"Expected {expected_prediction} for '{text}', but got {data['prediction']}"
+
+    print("All prediction correctness tests passed successfully.")
+
+
 def test_latency_and_performance():
     url = "http://ece444pra5-env.eba-3qdiupms.us-east-1.elasticbeanstalk.com/predict"
     test_inputs = [
